@@ -8,6 +8,12 @@ const app = express();
 const port = 3000;
 const routers = require("./routes");
 
+const db = require('./config/db')
+
+// connect db
+
+db.connect()
+
 console.log("router",routers)
 
 //middleware
