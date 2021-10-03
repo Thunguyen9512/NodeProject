@@ -7,22 +7,22 @@ const handlebars = require("express-handlebars");
 const app = express();
 const port = 3000;
 const routers = require("./routes");
+const methodOverride = require("method-override");
 
-const db = require('./config/db')
+const db = require("./config/db");
 
 // connect db
 
-db.connect()
+db.connect();
 
-console.log("router",routers)
-
+//overide method because expressjs do not accept PUT, PATCH method
+app.use(methodOverride("_method"));
 //middleware
 
 app.use(express.urlencoded()); //to req.body in POST method
 app.use(express.json()); // when work with: XML, fetch, axios
 
 //static file
-console.log("path", __dirname);
 app.use(express.static(path.join(__dirname, "/public")));
 
 //template engine

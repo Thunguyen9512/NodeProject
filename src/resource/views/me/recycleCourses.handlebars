@@ -1,0 +1,156 @@
+<form class="mt-4" method="POST" action="/me/recycle/multiDelete">
+
+    <h3 class="">Recycle Bin</h3>
+    <a href="/me/stored/courses" class="link-primary float-right">Courses List</a>
+    <div class="d-flex mb-3 ml-4 aline-item-center float-left">
+        <div>
+            <input type="checkbox" class="form-check-input" value="" id="select-all-checkbox">
+            <label class="form-check-label" for="select-all-checkbox">Select all</label>
+        </div>
+        <select class="custom-select-md action-select-field text-center" name="action" id="selected-action-field">
+            <option value="" selected>-- Action --</option>
+            <option value="permanent-delete">Permanent delete</option>
+        </select>
+        <button class="btn btn-primary btn-sm disable" type="submit" id="btn-submit-checkbox" disabled>Apply</button>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">#</th>
+                <th scope="col">Course name</th>
+                <th scope="col">Lever</th>
+                <th scope="col">Create at</th>
+                <th scope="col"></th>
+
+            </tr>
+        </thead>
+        {{#each courses}}
+        <tbody>
+            <tr>
+                <td>
+                    <div>
+                        <input type="checkbox" class="course-check-box" name="courseIds[]" value="{{this._id}}">
+                    </div>
+                </td>
+                <th scope="row">{{@index}}</th>
+                <td>{{this.name}}</td>
+                <td>{{this.lever}}</td>
+                <td>{{this.createAt}}</td>
+                <td>
+                    <a href="#" class=" btn-restore link-primary" data-id="{{this._id}}">Restore</a>
+                    <span>|</span>
+                    <a href="#" class="link-primary" data-toggle="modal" data-id="{{this._id}}"
+                        data-target="#exampleModal">Permanent Delete</a>
+                </td>
+            </tr>
+        </tbody>
+        {{else}}
+        <tbody>
+            <tr>
+                <td colspan="5" class="text-center">Nothing here. <a href="/me/stored/courses">Back to
+                        courses list</a></td>
+            </tr>
+        </tbody>
+        {{/each}}
+    </table>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    This action can't be undo, do you want to continue?
+                </div>
+                <div class="modal-footer">
+                    <button id="permanent-delete-button" type="button" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<form id="permanent-delete-hidden-form" method="POST"></form>
+<form id="restore-hidden-form" method="POST"></form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {         //callback function execute after jquery was load into dom
+        var idToDelete;
+        // handle modal
+        $('#exampleModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            idToDelete = button.data('id') // Extract info from data-* attributes
+        })
+
+        // handle delete
+        document.getElementById("permanent-delete-button").onclick = () => {
+            const deleteHiddenForm = document.getElementById("permanent-delete-hidden-form")
+            deleteHiddenForm.setAttribute("action", `/me/recycle/${idToDelete}/pernamentDelete`)
+            deleteHiddenForm.submit()
+        }
+
+        const btnsRestore = document.getElementsByClassName("btn-restore");
+        const cloneBtnsRestore = [...btnsRestore]   // because btnsRestore not working
+        cloneBtnsRestore.forEach((button) => {
+            button.onclick = () => {
+                const idToRestore = button.getAttribute('data-id')
+                const hiddenForm = document.getElementById("restore-hidden-form")
+                hiddenForm.setAttribute("action", `/me/recycle/${idToRestore}/restore`)
+                hiddenForm.submit()
+            }
+        })
+
+
+        //handle checkbox
+        const selectAllCheckbox = document.getElementById("select-all-checkbox")
+        const courseCheckboxs = document.getElementsByClassName("course-check-box")
+        const noOfCheckbox = courseCheckboxs.length
+        let isSelectedAll = false
+
+        //handle submit button
+        var action = "delete";
+        var isAnyChecked = false;
+        var isSubmitable = false
+        var isAction = false
+
+        selectAllCheckbox.onchange = () => {
+            isAnyChecked = selectAllCheckbox.checked
+            isSubmitable = isAnyChecked && isAction
+            document.getElementById("btn-submit-checkbox").disabled = !isSubmitable;
+            for (i = 0; i < noOfCheckbox; i++) {
+                courseCheckboxs[i].checked = selectAllCheckbox.checked
+            }
+        }
+
+        for (i = 0; i < noOfCheckbox; i++) {
+            courseCheckboxs[i].onchange = (e) => {
+                let noOfCheckedbox = 0
+                for (i = 0; i < noOfCheckbox; i++) {
+                    if (courseCheckboxs[i].checked) {
+                        noOfCheckedbox++;
+                    }
+                }
+                isSelectedAll = noOfCheckedbox === noOfCheckbox ? true : false
+                isAnyChecked = noOfCheckedbox > 0 ? true : false
+                selectAllCheckbox.checked = isSelectedAll
+                isSubmitable = isAnyChecked && isAction
+                document.getElementById("btn-submit-checkbox").disabled = !isSubmitable;
+            }
+        }
+
+        document.getElementById("selected-action-field").onchange = (e) => {
+            isAction = e.target.value !== "" ? true : false
+            isSubmitable = isAnyChecked && isAction
+            document.getElementById("btn-submit-checkbox").disabled = !isSubmitable;
+        }
+    })
+
+</script>

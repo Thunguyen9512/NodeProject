@@ -1,0 +1,23 @@
+<div>
+    <h1>Add new course</h1>
+</div>
+
+<form method="POST" action="/courses/store">
+    <div class="mb-3">
+        <label for="name" >Name</label>
+        <input type="text" class="form-control" name = "name">
+    </div>
+        <div class="mb-3">
+        <label for="decription" >Decription</label>
+        <input type="text" class="form-control" name = "description">
+    </div>
+        <div class="mb-3">
+        <label for="slug" >Slug</label>
+        <input type="text" class="form-control" name = "slug">
+    </div>
+        <div class="mb-3">
+        <label for="videoId" >VideoId</label>
+        <input type="text" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary" name = "videoId">Submit</button>
+</form>
